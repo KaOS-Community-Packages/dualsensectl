@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo pacman -U "../hidapi-master-1-x86_64.pkg.tar.zst"
+exit
