@@ -2,6 +2,8 @@
 
 ### [HOME](https://github.com/nowrep/dualsensectl) | [SOURCE](https://github.com/nowrep/dualsensectl/archive/refs/heads/main.tar.gz) | [FORK](https://github.com/MartinVonReichenberg/dualsensectl)
 
+___
+
 DualSense Control [DualSenseCTL] is a tool for controlling Sony PlayStation 5 DualSense controllers on Linux.
 It comes with a set of options and commands to tune the characteristics of the SONY PlayStation DualSense controller using either USB cable or BlueTooth.
 
@@ -9,6 +11,7 @@ It comes with a set of options and commands to tune the characteristics of the S
 
 *Requires __hidapi__ included in installation . . .*
 
+___
 
 #### Install:
 

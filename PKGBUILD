@@ -1,44 +1,39 @@
 pkgname=dualsensectl
-pkgver=0.4.r1.g602ffe4
+pkgver=0.5.r0.g7a2b191
 pkgrel=1
 pkgdesc='Tool for controlling Sony PlayStation 5 DualSense controller on Linux'
 arch=('x86_64')
 url='https://github.com/nowrep/dualsensectl'
 license=('GPL2')
-depends=('systemd' 'dbus' 'glibc' 'gcc-libs')
+depends=('systemd' 'dbus' 'glibc' 'gcc-libs' 'libusb' 'libgusb' 'libusbmuxd' )
 makedepends=('git' 'gcc' 'make' 'pkg-config')
 source=("${pkgname}::git+https://github.com/nowrep/dualsensectl#branch=main"
-        "hidapi" "${pkgname}.rules")
+        "hidapi-git-1:0.14.0.r29.gc2ffb03-1-x86_64.pkg.tar.zst"
+        "${pkgname}.rules")
 sha512sums=('SKIP' 'SKIP' 'SKIP')
-options=('!strip')
-
-prepare() {
-  chmod 0777 hidapi
-  ./hidapi
-}
 
 pkgver() {
-  cd "${pkgname}"
-  ( set -o pipefail
-    git describe --long --abbrev=7 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g' ||
+  cd "${srcdir}/${pkgname}/"
 
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
-  )
+  git describe --long --tags --abbrev=7 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g;s/^v//g'
+}
+
+prepare() {
+  msg2 "Need to install HidAPI (hidapi) first:"
+  sudo pacman -U "${srcdir}/hidapi-git-1:0.14.0.r29.gc2ffb03-1-x86_64.pkg.tar.zst"
 }
 
 build() {
-    make -C "${srcdir}/${pkgname}"
+  msg2 "Building package from SOURCE"
+  make -C "${srcdir}/${pkgname}" all
 }
 
 package() {
-    mkdir -p ${pkgdir}/etc/udev/rules.d/
-    cp ${srcdir}/${pkgname}.rules ${pkgdir}/etc/udev/rules.d/70-dualsensectl.rules
-    make -C "${srcdir}/${pkgname}" DESTDIR="${pkgdir}" install all
+  msg2 "Installing package from SOURCE to the system"
+  make -C "${srcdir}/${pkgname}" DESTDIR="${pkgdir}" install all
+
+  msg2 "Installing Udev rules from SOURCE to the system"
+  install -Dm644 "${pkgname}.rules" "${pkgdir}/etc/udev/rules.d/70-${pkgname}.rules"
 }
 
-install() {
-    $(CC) main.c -o $(TARGET) $(DEFINES) $(CFLAGS) $(LIBS)
-    install -D -m 755 -p $(TARGET) $(DESTDIR)/usr/bin/$(TARGET)
-    install -D -m 755 -p completion/$(TARGET) $(DESTDIR)/usr/share/bash-completion/completions/$(TARGET)
-    install -D -m 755 -p completion/_$(TARGET) $(DESTDIR)/usr/share/zsh/site-functions/_$(TARGET)
-}
+
